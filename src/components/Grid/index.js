@@ -1,12 +1,18 @@
 import React from "react";
 import GridItem from "../GridItem";
 import * as C from "./styles";
+import axios from 'axios'; // Não se esqueça de importar o axios
 
 const Grid = ({ itens, setItens }) => {
-  const onDelete = (ID) => {
-    const newArray = itens.filter((transaction) => transaction.id !== ID);
-    setItens(newArray);
-    localStorage.setItem("transactions", JSON.stringify(newArray));
+  const onDelete = async (item) => {
+    const route = item.tipo === 'gasto' ? 'gastos' : 'entradas';
+    try {
+      await axios.delete(`https://a3-engenhariadesoftware.onrender.com/${route}/remover/${item.codigo}`);
+      const updatedItems = itens.filter(item => it.codigo !== item.codigo); // Use a propriedade correta para identificar o item, como `item.id`
+      setItens(updatedItems);
+    } catch (error) {
+      console.error(`Erro ao deletar ${item}:`, error);
+    }
   };
 
   return (
@@ -31,4 +37,3 @@ const Grid = ({ itens, setItens }) => {
 };
 
 export default Grid;
-

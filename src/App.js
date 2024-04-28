@@ -8,82 +8,59 @@ import axios from "axios";
 
 const App = () => {
   const [transactionsList, setTransactionsList] = useState([]);
-  const [income, setIncome] = useState(0);
-  const [expense, setExpense] = useState(0);
-  const [total, setTotal] = useState(0);
 
-  // Função para carregar os gastos
-  const fetchExpenses = async () => {
-    try {
-      const response = await axios.get("https://a3-engenhariadesoftware.onrender.com/gastos");
-      const expenseData = response.data;
-      const totalExpense = expenseData
-        .filter((transaction) => transaction.valor > 0)
-        .reduce((total, transaction) => total + parseFloat(transaction.valor), 0);
-      setExpense(totalExpense.toFixed(2));
-      setTransactionsList(expenseData);
-    } catch (error) {
-      console.error("Erro ao buscar gastos:", error);
-    }
-  };
-
-  // Função para carregar as entradas
-  const fetchIncomes = async () => {
-    try {
-      const response = await axios.get("https://a3-engenhariadesoftware.onrender.com/entradas");
-      const incomeData = response.data;
-      const totalIncome = incomeData
-        .filter((transaction) => transaction.valor > 0)
-        .reduce((total, transaction) => total + parseFloat(transaction.valor), 0);
-      setIncome(totalIncome.toFixed(2));
-      setTransactionsList(incomeData);
-    } catch (error) {
-      console.error("Erro ao buscar entradas:", error);
-    }
-  };
-
- useEffect(() => {
-  const parseTotal = async () => {
-    try {
-      await fetchData();
-      const total = parseFloat(income) - parseFloat(expense);
-      setTotal(total.toFixed(2));
-      console.log("Total atualizado:", total.toFixed(2));
-    } catch (error) {
-      console.error("Erro ao buscar dados:", error);
-    }
-  };
-
+  // Carrega todas as transações e atualiza o estado
   const fetchData = async () => {
     try {
-      fetchIncomes();
-      fetchExpenses();
+      const [expenseResponse, incomeResponse] = await Promise.all([
+        axios.get("https://a3-engenhariadesoftware.onrender.com/gastos"),
+        axios.get("https://a3-engenhariadesoftware.onrender.com/entradas")
+      ]);
+      
+      const expensesWithFlag = expenseResponse.data.map(item => ({ ...item, tipo: 'gasto' }));
+      const incomesWithFlag = incomeResponse.data.map(item => ({ ...item, tipo: 'entrada' }));
+  
+      setTransactionsList([...expensesWithFlag, ...incomesWithFlag]);
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
     }
   };
-
-  parseTotal();
-}, [income, expense]); // Adicionamos income e expense como dependências
-
+  
   
 
-  const handleAddTransaction = async (newTransaction) => {
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Função para adicionar novas transações
+  const handleAddTransaction = async (newTransaction,isExpense) => {
+    const route = isExpense ? 'gastos' : 'entradas';
     try {
-      const response = await axios.post("/gastos", newTransaction);
-      setTransactionsList([...transactionsList, response.data]);
+      const response = await axios.post(`https://a3-engenhariadesoftware.onrender.com/${route}/cadastrar`, newTransaction);
     } catch (error) {
-      console.error("Erro ao adicionar gasto:", error);
+      console.error(`Erro ao adicionar ${newTransaction.tipo}:`, error);
     }
   };
+  
+
+    // Cálculo dinâmico de entradas, gastos e total
+  const totalIncome = transactionsList
+  .filter(item => item.tipo === 'entrada')
+  .reduce((acc, item) => acc + parseFloat(item.valor), 0);
+
+  const totalExpense = transactionsList
+  .filter(item => item.tipo === 'gasto')
+  .reduce((acc, item) => acc + parseFloat(item.valor), 0);
+
+  const total = totalIncome - totalExpense; 
+
 
   return (
     <>
       <Header />
-      <Resume income={income} expense={expense} total={total} />
+      <Resume income={totalIncome.toFixed(2)} expense={Math.abs(totalExpense).toFixed(2)} total={total.toFixed(2)} />
       <Form onAdd={handleAddTransaction} />
-      <button onClick={fetchExpenses}>Gastos</button>
-      <button onClick={fetchIncomes}>Entradas</button>
+      <button onClick={fetchData}>Atualizar Dados</button>
       <Grid itens={transactionsList} setItens={setTransactionsList} />
       <GlobalStyle />
     </>

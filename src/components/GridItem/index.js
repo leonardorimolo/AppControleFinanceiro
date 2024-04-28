@@ -12,17 +12,26 @@ const GridItem = ({ item, onDelete }) => {
       <C.Td>{item.motivo}</C.Td>
       <C.Td>{item.valor}</C.Td>
       <C.Td alignCenter>
-        {item.expense ? (
-          <FaRegArrowAltCircleDown color="red" />
+        {item.tipo === 'gasto' ? (
+          <>
+            <span style={{ color: 'red' }}>Gasto </span>
+            <FaRegArrowAltCircleDown color="red" />
+          </>
         ) : (
-          <FaRegArrowAltCircleUp color="green" />
+          <>
+            <span style={{ color: 'green' }}>Entrada </span>
+            
+            <FaRegArrowAltCircleUp color="green" />
+          </>
         )}
       </C.Td>
       <C.Td alignCenter>
-        <FaTrash onClick={() => onDelete(item.id)} />
+        <FaTrash onClick={() => onDelete(item)} style={{ cursor: 'pointer' }} />
       </C.Td>
     </C.Tr>
   );
 };
 
 export default GridItem;
+
+
