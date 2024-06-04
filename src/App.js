@@ -5,8 +5,19 @@ import Resume from "./components/Resume";
 import Form from "./components/Form";
 import Grid from "./components/Grid";
 import axios from "axios";
+import * as C from "./components/Form/styles";
+import styled from 'styled-components';
 
 const App = () => {
+
+  const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px; /* ajuste conforme necessário */
+`;
+
+
   const [transactionsList, setTransactionsList] = useState([]);
 
   // Carrega todas as transações e atualiza o estado
@@ -60,7 +71,9 @@ const App = () => {
       <Header />
       <Resume income={totalIncome.toFixed(2)} expense={Math.abs(totalExpense).toFixed(2)} total={total.toFixed(2)} />
       <Form onAdd={handleAddTransaction} />
-      <button onClick={fetchData}>Atualizar Dados</button>
+      <ButtonContainer>
+        <C.Button onClick={fetchData}>ATUALIZAR DADOS</C.Button>
+      </ButtonContainer>
       <Grid itens={transactionsList} setItens={setTransactionsList} />
       <GlobalStyle />
     </>
