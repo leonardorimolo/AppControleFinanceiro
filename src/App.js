@@ -47,7 +47,7 @@ const App = () => {
   const handleAddTransaction = async (newTransaction,isExpense) => {
     const route = isExpense ? 'gastos' : 'entradas';
     try {
-      const response = await axios.post(`https://a3-engenhariadesoftware.onrender.com/${route}/cadastrar`, newTransaction);
+      await axios.post(`https://a3-engenhariadesoftware.onrender.com/${route}/cadastrar`, newTransaction);
     } catch (error) {
       console.error(`Erro ao adicionar ${newTransaction.tipo}:`, error);
     }
